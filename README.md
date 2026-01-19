@@ -24,8 +24,6 @@
     <img src="https://img.shields.io/github/repo-size/akash-black-fox/BLACK-FOX-BOT?style=for-the-badge&logo=github&color=green" alt="Repo Size">
   </a>
   <br>
-  <!-- Visitors Count -->
-  <img src="https://profile-counter.glitch.me/akash-black-fox/count.svg" alt="Visitors">
 
   <br><br>
 
