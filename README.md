@@ -127,16 +127,22 @@ Edit the config.json file to set up your bot:
 
 ```json
 {
-  "BOTNAME": "BLACK-FOX",
-  "PREFIX": "/",
+  "BOTNAME": "BLACK-FOX", // আপনার বট এর নাম
+  "BOTNICK": "•| BLACK-FOX", // বট এর নিকনেম
+  "PREFIX": "/", // বট এর PREFIX
   "ADMINBOT": [
-    "YOUR_UID_HERE"
+    "100071539569680" // ADMIN UID
   ],
-  "ADMIN_THREAD": "YOUR_ADMIN_GROUP_ID",
-  "TIMEZONE": "Asia/Dhaka",
+  "REACT_DELETE_EMOJI": "😡", // অটো SMS ডিলিট ইমোজি
+  "ADMIN_THREAD": "848437044723898", // ADMIN GROUP ID
+  "PREFIX_ENABLED": true,
+  "ADMIN_ONLY_MODE": false,
   "AUTO_ISLAMIC_POST": true,
-  "AUTO_GROUP_MESSAGE": true
+  "AUTO_GROUP_MESSAGE": true,
+  "TIMEZONE": "Asia/Dhaka",
+  "APPROVE_ONLY": false
 }
+
 ```
 ### 4️⃣ Add Appstate
 
