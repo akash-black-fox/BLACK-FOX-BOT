@@ -12,12 +12,9 @@ let region = null;
 
 const fbLink = (ext) => ("https://www.facebook.com" + (ext ? '/' + ext : ''));
 const ERROR_RETRIEVING = "Error retrieving userID. This can be caused by many factors, including being blocked by Facebook for logging in from an unknown location. Try logging in with a browser to verify.";
+const logColor = "\x1b[36m"; 
+const resetColor = "\x1b[0m";
 
-/**
- * Sets global options based on provided configuration.
- * @param {Object} options - Configuration options to set.
- * @returns {Promise<void>}
- */
 async function setOptions(options = {}) {
   const optionHandlers = {
     online: (value) => (globalOptions.online = Boolean(value)),
@@ -45,8 +42,6 @@ async function setOptions(options = {}) {
       globalOptions.randomUserAgent = Boolean(value);
       if (value) {
         globalOptions.userAgent = utils.randomUserAgent();
-        utils.warn("Random user agent enabled. This is an experimental feature and may not work with some accounts. Use at your own risk.");
-        utils.warn("randomUserAgent", "UA selected:", globalOptions.userAgent);
       }
     },
     bypassRegion: (value) => (globalOptions.bypassRegion = value),
@@ -57,12 +52,6 @@ async function setOptions(options = {}) {
   });
 }
 
-/**
- * Checks if the account is suspended.
- * @param {Object} resp - Response object from the request.
- * @param {Array} appstate - Application state cookies.
- * @returns {Promise<Object|undefined>}
- */
 async function checkIfSuspended(resp, appstate) {
   try {
     const appstateCUser = appstate.find((i) => i.key === "c_user" || i.key === "i_user");
@@ -74,7 +63,6 @@ async function checkIfSuspended(resp, appstate) {
       const daystoDisable = resp.body?.match(/"log_out_uri":"(.*?)","title":"(.*?)"/);
       if (daystoDisable?.[2]) {
         suspendReasons.durationInfo = daystoDisable[2];
-        utils.error(`Suspension time remaining: ${suspendReasons.durationInfo}`);
       }
       
       const reasonDescription = resp.body?.match(/"reason_section_body":"(.*?)"/);
@@ -84,26 +72,15 @@ async function checkIfSuspended(resp, appstate) {
           .toLowerCase()
           .replace("your account, or activity on it, doesn't follow our community standards on ", "")
           .replace(/^\w/, (c) => c.toUpperCase());
-        
-        utils.error(`Alert on ${UID}: Account has been suspended!`);
-        utils.error(`Why suspended: ${suspendReasons.longReason}`);
-        utils.error(`Reason for suspension: ${suspendReasons.shortReason}`);
       }
       
       ctx = null;
       return { suspended: true, suspendReasons };
     }
   } catch (error) {
-    utils.error(`Error checking suspension: ${error.message}`);
   }
 }
 
-/**
- * Checks if the account is locked.
- * @param {Object} resp - Response object from the request.
- * @param {Array} appstate - Application state cookies.
- * @returns {Promise<Object|undefined>}
- */
 async function checkIfLocked(resp, appstate) {
   try {
     const appstateCUser = appstate.find((i) => i.key === "c_user" || i.key === "i_user");
@@ -115,23 +92,15 @@ async function checkIfLocked(resp, appstate) {
       
       if (lockDesc && lockDesc[1]) {
         lockedReasons.reason = lockDesc[1];
-        utils.error(`Alert on ${UID}: ${lockedReasons.reason}`);
       }
       
       ctx = null;
       return { locked: true, lockedReasons };
     }
   } catch (error) {
-    utils.error(`Error checking lock status: ${error.message}`);
   }
 }
 
-/**
- * Builds the API context and default functions.
- * @param {string} html - HTML response from Facebook.
- * @param {Object} jar - Cookie jar.
- * @returns {Array} - [Context, Default Functions]
- */
 async function buildAPI(html, jar) {
   let userID;
   const filePath = "black-fox-data.json";
@@ -144,7 +113,6 @@ async function buildAPI(html, jar) {
   }
   
   if (html.includes("/checkpoint/block/?next")) {
-    utils.warn("login", "Checkpoint detected. Please log in with a browser to verify.");
     throw new Error("Checkpoint detected");
   }
   
@@ -163,8 +131,10 @@ async function buildAPI(html, jar) {
     return result;
   }
   const dtsgResult = await refreshFb_dtsg();
-  utils.log("Logged in!");
-  utils.log("Choosing the best region...");
+  
+  console.log(`${logColor}➤ [LOGIN]${resetColor} Logged in!`);
+  console.log(`${logColor}➤ [LOGIN]${resetColor} Choosing best region...`);
+  
   const clientID = (Math.random() * 2147483648 | 0).toString(16);
   const mqttMatches = {
     oldFBMQTTMatch: html.match(/irisSeqID:"(.+?)",appID:219994525426954,endpoint:"(.+?)"/),
@@ -190,17 +160,16 @@ async function buildAPI(html, jar) {
   }
   if (globalOptions.bypassRegion) {
     region = globalOptions.bypassRegion.toUpperCase();
-    utils.warn("Bypass region is enabled. This is an experimental feature yet, doesn't guarantee the effectiveness.")
   }
   if (!region) {
     const regions = ["prn", "pnb", "vll", "hkg", "sin", "ftw", "ash"];
     region = regions[Math.floor(Math.random() * regions.length)].toUpperCase();
-    utils.warn("No region is specified from this account, now using random region. This doesn't guarantee the effectiveness.");
   }
   
   mqttEndpoint = mqttEndpoint || `wss://edge-chat.facebook.com/chat?region=${region}`;
-  utils.log("Region specified:", region);
-  utils.log("MQTT endpoint:", mqttEndpoint);
+  
+  console.log(`${logColor}➤ [LOGIN]${resetColor} Region: ${region}`);
+  
   ctx = {
     userID,
     jar,
@@ -226,19 +195,10 @@ async function buildAPI(html, jar) {
   }];
 }
 
-/**
- * Handles login process using app state or credentials.
- * @param {Object} appState - Application state cookies.
- * @param {string} email - User email.
- * @param {string} password - User password.
- * @param {Object} apiCustomized - Custom API configurations.
- * @param {Function} callback - Callback function to handle login result.
- * @returns {Promise<void>}
- */
 async function loginHelper(appState, apiCustomized, callback) {
   try {
     const jar = utils.getJar();
-    utils.log("Logging in...");
+    
     if (appState) {
       ((Array.isArray(appState) ? appState.map(c => [c.name || c.key, c.value].join('=')) : appState?.split(';')) || '').map(cookieString => {
         const domain = ".facebook.com";
@@ -275,7 +235,6 @@ async function loginHelper(appState, apiCustomized, callback) {
     api.ws3 = { ...(apiCustomized && { ...apiCustomized }) };
     const userID = api.getCurrentUserID();
     if (resp?.request?.uri?.href?.includes(fbLink("checkpoint")) && resp.request.uri.href.includes("601051028565049")) {
-      utils.warn(`Automated behavior detected on account ${userID}. This may cause auto-logout; resubmit appstate if needed.`);
       const bypassAutomation = await defaultFuncs.post(fbLink("api/graphql"), jar, {
         av: userID,
         fb_api_caller_class: "RelayModern",
@@ -289,34 +248,19 @@ async function loginHelper(appState, apiCustomized, callback) {
         })
       }, globalOptions);
     }
-    utils.log("Connected to specified region.");
     const detectLocked = await checkIfLocked(resp, mergedAppState);
     if (detectLocked) throw detectLocked;
     const detectSuspension = await checkIfSuspended(resp, mergedAppState);
     if (detectSuspension) throw detectSuspension;
-    utils.log("Successfully logged in.");
-    const botInitialData = await api.getBotInitialData();
-    if (!botInitialData.error) {
-      utils.log(`Hello, ${botInitialData.name} (${botInitialData.uid})`);
-      ctx.userName = botInitialData.name;
-    } else {
-      utils.warn(botInitialData.error);
-      utils.warn(`WARNING: Failed to fetch account info. Proceeding to log in for user ${userID}`);
-    }
-    utils.log("To check updates: you may check on https://github.com/NethWs3Dev/ws3-fca");
+    
+    console.log(`${logColor}➤ [LOGIN]${resetColor} Successfully logged in!`);
+    
     return callback(null, api);
   } catch (error) {
     return callback(error);
   }
 }
 
-/**
- * Main login function.
- * @param {String} cookie - Login data containing cookie (JSON/header string).
- * @param {Object|Function} options - Configuration options or callback function.
- * @param {Function} [callback] - Callback function to handle login result.
- * @returns {void}
- */
 async function login(cookie, options, callback) {
   if (typeof options === "function") {
     callback = options;
@@ -347,7 +291,6 @@ async function login(cookie, options, callback) {
       },
       (loginError, loginApi) => {
         if (loginError) {
-            utils.error("login", loginError);
             return callback(loginError);
         }
         return callback(null, loginApi);
