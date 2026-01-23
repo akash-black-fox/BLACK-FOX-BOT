@@ -198,9 +198,9 @@ module.exports = {
     
     return send.reply(`╭───「 ❓ 𝐇𝐄𝐋𝐏 」───╮
 │
-│ 👉 .busy on
-│ 👉 .busy off
-│ 👉 .busy check
+│ 👉 ${config.PREFIX}busy on
+│ 👉 ${config.PREFIX}busy off
+│ 👉 ${config.PREFIX}busy check
 │
 ╰─────────────────────╯`);
   }
