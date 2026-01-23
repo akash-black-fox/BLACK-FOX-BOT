@@ -63,12 +63,14 @@ module.exports.run = async function({ api, event, send, config, client }) {
 
     const info = await send.reply(msg);
     
-    global.client.handleReply.push({
-      name: this.config.name,
-      messageID: info.messageID,
-      author: senderID,
-      pendingList: pendingList
-    });
+    if (global.client.replies) {
+        global.client.replies.set(info.messageID, {
+          commandName: this.config.name,
+          messageID: info.messageID,
+          author: senderID,
+          pendingList: pendingList
+        });
+    }
 
   } catch (e) {
     return send.reply("❌ মেসেজ লোড করতে সমস্যা হচ্ছে!");
