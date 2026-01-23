@@ -2,7 +2,7 @@ const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
 
-const GROQ_API_KEY = "Your GROQ API KEY"; 
+const GROQ_API_KEY = "Your-GROQ-API-KEY"; 
 const MODEL_NAME = "llama-3.3-70b-versatile";
 
 const PROMPTS = {
