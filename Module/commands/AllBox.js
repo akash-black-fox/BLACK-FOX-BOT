@@ -1,11 +1,12 @@
 module.exports.config = {
   name: 'allbox',
-  version: '2.0.0',
+  version: '1.0.0',
   credits: "AKASH HASAN",
-  hasPermssion: 2, 
   description: 'Manage joined groups (Ban/Unban/Leave/Delete Data)',
-  commandCategory: 'Admin',
-  usages: 'allbox [page]',
+  category: 'Admin',
+  usage: 'allbox [page]',
+  adminOnly: true,
+  prefix: true,
   cooldowns: 5
 };
 
@@ -41,7 +42,6 @@ module.exports.handleReply = async function ({ api, event, args, Threads, handle
       banData.banned = true;
       banData.dateAdded = new Date().toISOString();
       await Threads.setData(groupID, { data: banData });
-      global.data.threadBanned.set(groupID, { dateAdded: banData.dateAdded });
       
       api.sendMessage(`╭───「 ⛔ 𝐁𝐀𝐍𝐍𝐄𝐃 」───╮
 │
@@ -64,7 +64,6 @@ module.exports.handleReply = async function ({ api, event, args, Threads, handle
       unbanData.banned = false;
       unbanData.dateAdded = null;
       await Threads.setData(groupID, { data: unbanData });
-      global.data.threadBanned.delete(groupID);
       
       api.sendMessage(`╭───「 ✅ 𝐔𝐍𝐁𝐀𝐍 」───╮
 │
@@ -112,8 +111,16 @@ module.exports.handleReply = async function ({ api, event, args, Threads, handle
   }
 };
 
-module.exports.run = async function ({ api, event, args }) {
-  const { threadID, messageID } = event;
+module.exports.run = async function ({ api, event, args, config }) {
+  const { threadID, messageID, senderID } = event;
+  
+  if (!config.ADMINBOT.includes(senderID)) {
+    return api.sendMessage(`╭───「 ⚠️ 𝐖𝐀𝐑𝐍𝐈𝐍𝐆 」───╮
+│
+│ ❌ 𝐀𝐜𝐜𝐞𝐬𝐬 𝐃𝐞𝐧𝐢𝐞𝐝!
+│
+╰─────────────────────╯`, threadID);
+  }
   
   try {
     const inbox = await api.getThreadList(100, null, ["INBOX"]);
@@ -126,7 +133,6 @@ module.exports.run = async function ({ api, event, args }) {
     
     let msg = `╭───「 𝐆𝐑𝐎𝐔𝐏 𝐋𝐈𝐒𝐓 」───╮\n│\n`;
 
-    // Pagination Logic
     let page = parseInt(args[0]) || 1;
     page = page < 1 ? 1 : page;
     let limit = 10;
@@ -148,13 +154,15 @@ module.exports.run = async function ({ api, event, args }) {
     msg += `👉 𝐑𝐞𝐩𝐥𝐲: "ban/out/del [number]"`;
 
     return api.sendMessage(msg, threadID, (error, info) => {
-      global.client.handleReply.push({
-        name: this.config.name,
-        messageID: info.messageID,
-        author: event.senderID,
-        groupIDs,
-        groupNames
-      });
+      if (global.client.replies) {
+          global.client.replies.set(info.messageID, {
+            commandName: this.config.name,
+            messageID: info.messageID,
+            author: senderID,
+            groupIDs,
+            groupNames
+          });
+      }
     }, messageID);
 
   } catch (e) {
