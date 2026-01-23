@@ -60,12 +60,14 @@ module.exports.run = async function({ api, event, send, Threads, config }) {
   
   const info = await send.reply(msg);
   
-  global.client.handleReply.push({
-    name: this.config.name,
-    messageID: info.messageID,
-    author: senderID,
-    pendingList: list
-  });
+  if (global.client.replies) {
+      global.client.replies.set(info.messageID, {
+        commandName: this.config.name,
+        messageID: info.messageID,
+        author: senderID,
+        pendingList: list
+      });
+  }
 };
 
 module.exports.handleReply = async function({ api, event, send, handleReply, Threads }) {
