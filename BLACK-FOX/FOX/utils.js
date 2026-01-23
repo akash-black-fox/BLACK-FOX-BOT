@@ -1,13 +1,14 @@
-/* eslint-disable no-prototype-builtins */
 "use strict";
 
 const chalk = require("chalk");
 const gradient = require("gradient-string");
 const echaceb = gradient(["#0061ff", "#681297"]);
-const ws = echaceb("ws3-fca");
+const ws = "";
+
 const getRandom = arr => arr[Math.floor(Math.random() * arr.length)];
 const defaultUserAgent = "facebookexternalhit/1.1";
 const windowsUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+
 function randomUserAgent() {
     const platform = {
     platform: ['Windows NT 10.0; Win64; x64', 'Macintosh; Intel Mac OS X 14.7; rv:132.0'],
@@ -66,10 +67,7 @@ function getHeaders(url, options, ctx, customHeader) {
     ...headers,
     "User-Agent": customHeader?.customUserAgent ?? options?.userAgent ?? defaultUserAgent
   }
-  /*if (headers1["User-Agent"]) {
-    delete headers1["User-Agent"];
-    headers1["User-Agent"] = customHeader?.customUserAgent ?? options?.userAgent ?? defaultUserAgent;
-  */
+  
   if (ctx && ctx.region) headers1["X-MSGR-Region"] = ctx.region;
   if (customHeader) {
     Object.assign(headers1, customHeader);
@@ -77,7 +75,6 @@ function getHeaders(url, options, ctx, customHeader) {
   }
   return headers1;
 }
-
 
 function isReadableStream(obj) {
   return obj instanceof stream.Stream && typeof obj._read == "function" && getType(obj._readableState) == "Object";
@@ -340,12 +337,6 @@ function getExtension(original_extension, fullFileName = "") {
 }
 
 function _formatAttachment(attachment1, attachment2) {
-  // TODO: THIS IS REALLY BAD
-  // This is an attempt at fixing Facebook's inconsistencies. Sometimes they give us
-  // two attachment objects, but sometimes only one. They each contain part of the
-  // data that you'd want so we merge them for convenience.
-  // Instead of having a bunch of if statements guarding every access to image_data,
-  // we set it to empty object and use the fact that it'll return undefined.
   const fullFileName = attachment1.filename;
   const fileSize = Number(attachment1.fileSize || 0);
   const durationVideo = attachment1.genericMetadata ? Number(attachment1.genericMetadata.videoLength) : undefined;
@@ -376,8 +367,7 @@ function _formatAttachment(attachment1, attachment2) {
 
     blob = attachment1.extensible_attachment;
   }
-  // TODO: Determine whether "sticker", "photo", "file" etc are still used
-  // KEEP IN SYNC WITH getThreadHistory
+  
   switch (type) {
     case "sticker":
       return {
@@ -399,9 +389,9 @@ function _formatAttachment(attachment1, attachment2) {
           framesPerRow: attachment1.metadata.framesPerRow,
           framesPerCol: attachment1.metadata.framesPerCol,
 
-          stickerID: attachment1.metadata.stickerID.toString(), // @Legacy
-          spriteURI: attachment1.metadata.spriteURI, // @Legacy
-          spriteURI2x: attachment1.metadata.spriteURI2x // @Legacy
+          stickerID: attachment1.metadata.stickerID.toString(), 
+          spriteURI: attachment1.metadata.spriteURI, 
+          spriteURI2x: attachment1.metadata.spriteURI2x 
       };
     case "file":
       return {
@@ -417,7 +407,7 @@ function _formatAttachment(attachment1, attachment2) {
           isMalicious: attachment2.is_malicious,
           contentType: attachment2.mime_type,
 
-          name: attachment1.name // @Legacy
+          name: attachment1.name 
       };
     case "photo":
       return {
@@ -438,10 +428,10 @@ function _formatAttachment(attachment1, attachment2) {
           largePreviewWidth: attachment1.large_preview_width,
           largePreviewHeight: attachment1.large_preview_height,
 
-          url: attachment1.metadata.url, // @Legacy
-          width: attachment1.metadata.dimensions.split(",")[0], // @Legacy
-          height: attachment1.metadata.dimensions.split(",")[1], // @Legacy
-          name: fullFileName // @Legacy
+          url: attachment1.metadata.url, 
+          width: attachment1.metadata.dimensions.split(",")[0], 
+          height: attachment1.metadata.dimensions.split(",")[1], 
+          name: fullFileName 
       };
     case "animated_image":
       return {
@@ -460,15 +450,15 @@ function _formatAttachment(attachment1, attachment2) {
           width: attachment2.image_data.width,
           height: attachment2.image_data.height,
 
-          name: attachment1.name, // @Legacy
-          facebookUrl: attachment1.url, // @Legacy
-          thumbnailUrl: attachment1.thumbnail_url, // @Legacy
-          rawGifImage: attachment2.image_data.raw_gif_image, // @Legacy
-          rawWebpImage: attachment2.image_data.raw_webp_image, // @Legacy
-          animatedGifUrl: attachment2.image_data.animated_gif_url, // @Legacy
-          animatedGifPreviewUrl: attachment2.image_data.animated_gif_preview_url, // @Legacy
-          animatedWebpUrl: attachment2.image_data.animated_webp_url, // @Legacy
-          animatedWebpPreviewUrl: attachment2.image_data.animated_webp_preview_url // @Legacy
+          name: attachment1.name, 
+          facebookUrl: attachment1.url, 
+          thumbnailUrl: attachment1.thumbnail_url, 
+          rawGifImage: attachment2.image_data.raw_gif_image, 
+          rawWebpImage: attachment2.image_data.raw_webp_image, 
+          animatedGifUrl: attachment2.image_data.animated_gif_url, 
+          animatedGifPreviewUrl: attachment2.image_data.animated_gif_preview_url, 
+          animatedWebpUrl: attachment2.image_data.animated_webp_url, 
+          animatedWebpPreviewUrl: attachment2.image_data.animated_webp_preview_url 
       };
     case "share":
       return {
@@ -489,10 +479,10 @@ function _formatAttachment(attachment1, attachment2) {
           subattachments: attachment1.share.subattachments,
           properties: {},
 
-          animatedImageSize: attachment1.share.media.animated_image_size, // @Legacy
-          facebookUrl: attachment1.share.uri, // @Legacy
-          target: attachment1.share.target, // @Legacy
-          styleList: attachment1.share.style_list // @Legacy
+          animatedImageSize: attachment1.share.media.animated_image_size, 
+          facebookUrl: attachment1.share.uri, 
+          target: attachment1.share.target, 
+          styleList: attachment1.share.style_list 
       };
     case "video":
       return {
@@ -514,14 +504,11 @@ function _formatAttachment(attachment1, attachment2) {
 
           videoType: "unknown",
 
-          thumbnailUrl: attachment1.thumbnail_url // @Legacy
+          thumbnailUrl: attachment1.thumbnail_url 
       };
     case "error":
       return {
         type: "error",
-
-          // Save error attachments because we're unsure of their format,
-          // and whether there are cases they contain something useful for debugging.
           attachment1: attachment1,
           attachment2: attachment2
       };
@@ -544,10 +531,10 @@ function _formatAttachment(attachment1, attachment2) {
           largePreviewWidth: blob.large_preview.width,
           largePreviewHeight: blob.large_preview.height,
 
-          url: blob.large_preview.uri, // @Legacy
-          width: blob.original_dimensions.x, // @Legacy
-          height: blob.original_dimensions.y, // @Legacy
-          name: blob.filename // @Legacy
+          url: blob.large_preview.uri, 
+          width: blob.original_dimensions.x, 
+          height: blob.original_dimensions.y, 
+          name: blob.filename 
       };
     case "MessageAnimatedImage":
       return {
@@ -566,14 +553,14 @@ function _formatAttachment(attachment1, attachment2) {
           width: blob.animated_image.width,
           height: blob.animated_image.height,
 
-          thumbnailUrl: blob.preview_image.uri, // @Legacy
-          name: blob.filename, // @Legacy
-          facebookUrl: blob.animated_image.uri, // @Legacy
-          rawGifImage: blob.animated_image.uri, // @Legacy
-          animatedGifUrl: blob.animated_image.uri, // @Legacy
-          animatedGifPreviewUrl: blob.preview_image.uri, // @Legacy
-          animatedWebpUrl: blob.animated_image.uri, // @Legacy
-          animatedWebpPreviewUrl: blob.preview_image.uri // @Legacy
+          thumbnailUrl: blob.preview_image.uri, 
+          name: blob.filename, 
+          facebookUrl: blob.animated_image.uri, 
+          rawGifImage: blob.animated_image.uri, 
+          animatedGifUrl: blob.animated_image.uri, 
+          animatedGifPreviewUrl: blob.preview_image.uri, 
+          animatedWebpUrl: blob.animated_image.uri, 
+          animatedWebpPreviewUrl: blob.preview_image.uri 
       };
     case "MessageVideo":
       return {
@@ -596,7 +583,7 @@ function _formatAttachment(attachment1, attachment2) {
 
           videoType: blob.video_type.toLowerCase(),
 
-          thumbnailUrl: blob.large_image.uri // @Legacy
+          thumbnailUrl: blob.large_image.uri 
       };
     case "MessageAudio":
       return {
@@ -635,9 +622,9 @@ function _formatAttachment(attachment1, attachment2) {
           framesPerRow: blob.frames_per_row,
           framesPerCol: blob.frames_per_column,
 
-          stickerID: blob.id, // @Legacy
-          spriteURI: blob.sprite_image, // @Legacy
-          spriteURI2x: blob.sprite_image_2x // @Legacy
+          stickerID: blob.id, 
+          spriteURI: blob.sprite_image, 
+          spriteURI2x: blob.sprite_image_2x 
       };
     case "MessageLocation":
       var urlAttach = blob.story_attachment.url;
@@ -678,9 +665,9 @@ function _formatAttachment(attachment1, attachment2) {
           url: u || urlAttach,
           address: where1,
 
-          facebookUrl: blob.story_attachment.url, // @Legacy
-          target: blob.story_attachment.target, // @Legacy
-          styleList: blob.story_attachment.style_list // @Legacy
+          facebookUrl: blob.story_attachment.url, 
+          target: blob.story_attachment.target, 
+          styleList: blob.story_attachment.style_list 
       };
     case "ExtensibleAttachment":
       return {
@@ -725,9 +712,9 @@ function _formatAttachment(attachment1, attachment2) {
             return obj;
           }, {}),
 
-          facebookUrl: blob.story_attachment.url, // @Legacy
-          target: blob.story_attachment.target, // @Legacy
-          styleList: blob.story_attachment.style_list // @Legacy
+          facebookUrl: blob.story_attachment.url, 
+          target: blob.story_attachment.target, 
+          styleList: blob.story_attachment.style_list 
       };
     case "MessageFile":
       return {
@@ -892,7 +879,6 @@ function formatHistoryMessage(m) {
   }
 }
 
-// Get a more readable message type for AdminTextMessages
 function getAdminTextMessageType(type) {
   switch (type) {
     case 'unpin_messages_v2':
@@ -923,13 +909,6 @@ function getAdminTextMessageType(type) {
 function formatDeltaEvent(m) {
   let logMessageType;
   let logMessageData;
-
-  // log:thread-color => {theme_color}
-  // log:user-nickname => {participant_id, nickname}
-  // log:thread-icon => {thread_icon}
-  // log:thread-name => {name}
-  // log:subscribe => {addedParticipants - [Array]}
-  // log:unsubscribe => {leftParticipantFbId}
 
   switch (m.class) {
     case "AdminTextMessage":
@@ -984,8 +963,6 @@ function formatTyp(event) {
     threadID: formatID(
       (event.to || event.thread_fbid || event.from).toString()
     ),
-    // When receiving typ indication from mobile, `from_mobile` isn't set.
-    // If it is, we just use that value.
     fromMobile: event.hasOwnProperty("from_mobile") ? event.from_mobile : true,
     userID: (event.realtime_viewer_fbid || event.from).toString(),
     type: "typ"
@@ -993,8 +970,6 @@ function formatTyp(event) {
 }
 
 function formatDeltaReadReceipt(delta) {
-  // otherUserFbId seems to be used as both the readerID and the threadID in a 1-1 chat.
-  // In a group chat actorFbId is used for the reader and threadFbId for the thread.
   return {
     reader: (delta.threadKey.otherUserFbId || delta.actorFbId).toString(),
     time: delta.actionTimestampMs,
@@ -1043,16 +1018,6 @@ function getFrom(str, startToken, endToken) {
 
 function makeParsable(html) {
   const withoutForLoop = html.replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, "");
-
-  // (What the fuck FB, why windows style newlines?)
-  // So sometimes FB will send us base multiple objects in the same response.
-  // They're all valid JSON, one after the other, at the top level. We detect
-  // that and make it parse-able by JSON.parse.
-  //       Ben - July 15th 2017
-  //
-  // It turns out that Facebook may insert random number of spaces before
-  // next object begins (issue #616)
-  //       rav_kr - 2018-03-19
   const maybeMultipleObjects = withoutForLoop.split(/\}\r\n *\{/);
   if (maybeMultipleObjects.length === 1) return maybeMultipleObjects;
 
@@ -1181,14 +1146,12 @@ function parseAndCheckLogin(ctx, http, retryCount) {
         throw err;
       }
 
-      // In some cases the response contains only a redirect URL which should be followed
       if (res.redirect && data.request.method === "GET") {
         return http
           .get(res.redirect, ctx.jar)
           .then(parseAndCheckLogin(ctx, http));
       }
 
-      // TODO: handle multiple cookies?
       if (res.jsmods && res.jsmods.require && Array.isArray(res.jsmods.require[0]) && res.jsmods.require[0][0] === "Cookie") {
         res.jsmods.require[0][3][0] = res.jsmods.require[0][3][0].replace("_js_", "");
         const requireCookie = res.jsmods.require[0][3];
@@ -1196,15 +1159,12 @@ function parseAndCheckLogin(ctx, http, retryCount) {
         ctx.jar.setCookie(formatCookie(requireCookie, "messenger"), "https://www.messenger.com");
       }
 
-      // On every request we check if we got a DTSG and we mutate the context so that we use the latest
-      // one for the next requests.
       if (res.jsmods && Array.isArray(res.jsmods.require)) {
         const arr = res.jsmods.require;
         for (const i in arr) {
           if (arr[i][0] === "DTSG" && arr[i][1] === "setToken") {
             ctx.fb_dtsg = arr[i][3][0];
 
-            // Update ttstamp since that depends on fb_dtsg
             ctx.ttstamp = "2";
             for (let j = 0; j < ctx.fb_dtsg.length; j++) {
               ctx.ttstamp += ctx.fb_dtsg.charCodeAt(j);
@@ -1301,7 +1261,7 @@ function formatThread(data) {
     messageCount: data.message_count,
     imageSrc: data.image_src,
     timestamp: data.timestamp,
-    serverTimestamp: data.server_timestamp, // what is this?
+    serverTimestamp: data.server_timestamp, 
     muteUntil: data.mute_until,
     isCanonicalUser: data.is_canonical_user,
     isCanonical: data.is_canonical,
@@ -1347,9 +1307,6 @@ function formatPresence(presence, userID) {
 }
 
 function decodeClientPayload(payload) {
-  /*
-  Special function which Client using to "encode" clients JSON payload
-  */
   return JSON.parse(String.fromCharCode.apply(null, payload));
 }
 
@@ -1387,17 +1344,15 @@ class CustomError extends Error {
 
 module.exports = {
   CustomError,
-  //logs
   log(...args) {
-    console.log(ws, chalk.green.bold("[LOG]"), ...args);
+    console.log(chalk.cyan.bold("➤ [LOGIN]"), ...args);
   },
   error(...args) {
-    console.error(ws, chalk.red.bold("[ERROR]"), ...args);
+    console.error(chalk.red.bold("✖ [ERROR]"), ...args);
   },
   warn(...args) {
-    console.warn(ws, chalk.yellow.bold("[WARNING]"), ...args);
+    console.warn(chalk.yellow.bold("⚠ [WARN]"), ...args);
   },
-  //end logs
   isReadableStream,
   cleanGet,
   get,
