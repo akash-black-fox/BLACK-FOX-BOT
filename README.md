@@ -53,7 +53,7 @@
         <img src="https://img.shields.io/badge/KATABUMP-FF4500?style=for-the-badge&logo=fire&logoColor=white" width="100%">
       </td>
       <td align="center" width="350">
-        <a href="https://control.katabump.com">
+        <a href="https://katabump.com">
           <img src="https://img.shields.io/badge/DEPLOY%20ON%20KATABUMP-FAST%20%26%20SECURE-FF4500?style=flat-square&logo=server" alt="Deploy on Katabump">
         </a>
       </td>
